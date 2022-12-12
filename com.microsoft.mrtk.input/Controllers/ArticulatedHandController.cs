@@ -94,18 +94,29 @@ namespace Microsoft.MixedReality.Toolkit.Input
                 if (gotPinchData)
                 {
                     controllerState.selectInteractionState.value = pinchAmount;
-
+                    controllerState.uiPressInteractionState.value = pinchAmount;
                     // Workaround for missing select actions on devices without interaction profiles
                     // for hands, such as Varjo and Quest. Should be removed once we have universal
                     // hand interaction profile(s) across vendors.
-                    if (!selectAction.action.HasAnyControls())
+                    bool selectActionHasControls = selectAction.action.HasAnyControls();
+                    bool uiPressHasControls = uiPressAction.action.HasAnyControls();
+                    if(!selectActionHasControls || !uiPressHasControls)
                     {
                         // Debounced.
                         bool isPinched = pinchAmount >= (pinchedLastFrame ? 0.9f : 1.0f);
 
-                        controllerState.selectInteractionState.active = isPinched;
-                        controllerState.selectInteractionState.activatedThisFrame = isPinched && !pinchedLastFrame;
-                        controllerState.selectInteractionState.deactivatedThisFrame = !isPinched && pinchedLastFrame;
+                        if(!selectActionHasControls)
+                        {
+                            controllerState.selectInteractionState.active = isPinched;
+                            controllerState.selectInteractionState.activatedThisFrame = isPinched && !pinchedLastFrame;
+                            controllerState.selectInteractionState.deactivatedThisFrame = !isPinched && pinchedLastFrame;
+                        }
+                        if(!uiPressHasControls)
+                        {
+                            controllerState.uiPressInteractionState.active = isPinched;
+                            controllerState.uiPressInteractionState.activatedThisFrame = isPinched && !pinchedLastFrame;
+                            controllerState.uiPressInteractionState.deactivatedThisFrame = !isPinched && pinchedLastFrame;
+                        }
 
                         pinchedLastFrame = isPinched;
                     }
